@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="">	
+<head>
+	<meta charset="utf-8"/>
+	<title>ansible批量收集cpu核心数、data目录、内存、系统版本信息 - Restart</title>	
+
+	<meta name="author" content="wxz" />
+	<meta name="copyright" content="wxz" />
+	<meta property="og:site_name" content="Restart" />
+	<meta name="twitter:card" content="summary" />
+	<meta name="twitter:title" content="ansible批量收集cpu核心数、data目录、内存、系统版本信息" />
+	<meta name="date" content="2023-10-14 17:20:00+08:00" />
+	<meta property="og:type" content="article" />
+	<meta property="og:locale" content="en" />
+	<meta property="og:published_time" content="2023-10-14 17:20:00+08:00" />
+	<meta property="og:title" content="ansible批量收集cpu核心数、data目录、内存、系统版本信息" />
+	<meta property="og:url" content="./ansiblepi-liang-shou-ji-cpuhe-xin-shu-datamu-lu-nei-cun-xi-tong-ban-ben-xin-xi.html" />
+	<meta property="og:description" content="ansible收集cpu核心数、data目录、内存、系统版本信息 该剧本会收集（支持centos6、centos7系统） 主机ip地址、cpu核心数、data目录、内存、系统版本信息 - name: Gather System Information hosts: servers become: yes tasks: - name: Get number of CPU cores debug: msg …" />
+	<meta name="description" content="ansible收集cpu核心数、data目录、内存、系统版本信息 该剧本会收集（支持centos6、centos7系统） 主机ip地址、cpu核心数、data目录、内存、系统版本信息 - name: Gather System Information hosts: servers become: yes tasks: - name: Get number of CPU cores debug: msg …" />
+	<meta name="HandheldFriendly" content="True" />
+	<meta name="MobileOptimized" content="320" />
+	<meta name="viewport" content="width=device-width, target-densitydpi=160dpi, initial-scale=1.0" />
+	<link rel="shortcut icon" href="./favicon.ico" type="image/x-icon" />
+	<link rel="icon" href="./favicon.ico" type="image/x-icon" />
+	<link href='https://fonts.googleapis.com/css?family=Droid+Sans:700,400|Droid+Sans+Mono' rel='stylesheet' type='text/css' />
+	<link rel="stylesheet" href="./theme/css/main.css" type="text/css" />
+		
+	<!--[if lt IE 9]>
+		<script src="//html5shim.googlecode.com/svn/trunk/html5.js"></script>
+	<![endif]-->
+	
+</head>
+	
+<body>		
+	<header class="clearfix" role="banner">
+		<div class="wrapper">
+			<h1 class="huge"><a href=".">Restart</a></h1>
+		</div>
+	</header>
+	
+<div role="main" class="content clearfix">	
+	<article>
+		<div class="post wrapper">
+			<h1>ansible批量收集cpu核心数、data目录、内存、系统版本信息</h1>
+			<h1>ansible收集cpu核心数、data目录、内存、系统版本信息</h1>
+<p>该剧本会收集（支持centos6、centos7系统）
+主机ip地址、cpu核心数、data目录、内存、系统版本信息</p>
+<div class="highlight"><pre><span></span><code>-<span class="w"> </span>name:<span class="w"> </span>Gather<span class="w"> </span>System<span class="w"> </span>Information
+<span class="w">  </span>hosts:<span class="w"> </span>servers
+<span class="w">  </span>become:<span class="w"> </span>yes
+
+<span class="w">  </span>tasks:
+<span class="w">    </span>-<span class="w"> </span>name:<span class="w"> </span>Get<span class="w"> </span>number<span class="w"> </span>of<span class="w"> </span>CPU<span class="w"> </span>cores
+<span class="w">      </span>debug:
+<span class="w">        </span>msg:<span class="w"> </span><span class="s2">&quot;{{ ansible_processor_vcpus }}&quot;</span>
+
+<span class="w">    </span>-<span class="w"> </span>name:<span class="w"> </span>Get<span class="w"> </span>data<span class="w"> </span>directory<span class="w"> </span>size
+<span class="w">      </span>vars:
+<span class="w">        </span>size_bytes:<span class="w"> </span><span class="s2">&quot;{{ ansible_mounts | selectattr(&#39;mount&#39;, &#39;match&#39;, &#39;/data</span>$<span class="s2">&#39;) | map(attribute=&#39;size_total&#39;) | list | first }}&quot;</span>
+<span class="w">      </span>set_fact:
+<span class="w">        </span>data_dir_size_gb:<span class="w"> </span><span class="s2">&quot;{{ (size_bytes | int / 1024 / 1024 / 1024) | round(2) }}&quot;</span>
+
+<span class="w">    </span>-<span class="w"> </span>name:<span class="w"> </span>Get<span class="w"> </span>memory<span class="w"> </span>size
+<span class="w">      </span>vars:
+<span class="w">        </span>size_bytes:<span class="w"> </span><span class="s2">&quot;{{ ansible_memtotal_mb * 1024 * 1024 }}&quot;</span>
+<span class="w">      </span>set_fact:
+<span class="w">        </span>memory_size_gb:<span class="w"> </span><span class="s2">&quot;{{ (size_bytes | int / 1024 / 1024 / 1024) | round(2) }}&quot;</span>
+
+<span class="w">    </span>-<span class="w"> </span>name:<span class="w"> </span>Get<span class="w"> </span>system<span class="w"> </span>version
+<span class="w">      </span>debug:
+<span class="w">        </span>msg:<span class="w"> </span><span class="s2">&quot;{{ ansible_distribution }} {{ ansible_distribution_version }}&quot;</span>
+
+<span class="w">  </span>post_tasks:
+<span class="w">    </span>-<span class="w"> </span>name:<span class="w"> </span>Display<span class="w"> </span>gathered<span class="w"> </span>information
+<span class="w">      </span>debug:
+<span class="w">        </span>msg:<span class="w"> </span><span class="s2">&quot;Host: {{ inventory_hostname }}\nCPU Cores: {{ ansible_processor_vcpus }}\nData Directory Size: {{ data_dir_size_gb }} GB\nMemory Size: {{ memory_size_gb }} GB\nSystem Version: {{ ansible_distribution }} {{ ansible_distribution_version }}&quot;</span>
+</code></pre></div>
+
+<p>执行过程：这是1.yaml代表上述剧本内容</p>
+<div class="highlight"><pre><span></span><code>ansible-playbook<span class="w">  </span><span class="m">1</span>.yaml
+</code></pre></div>
+
+<p><img alt="image-20230406130223622" src="ansible获取系统信息.assets/image-20230406130223622.png"></p>
+<p>注意：
+如果系统没有data目录，那台主机将会执行失败，不会输出结果，确保执行主机上有data目录，如果没有，请在hosts变量中主机，剔除掉没有data目录的主机数目</p>
+
+			<a href="https://twitter.com/share" class="twitter-share-button" data-via="" data-lang="en" data-size="large" data-related="">Tweet</a>
+			<script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+		</div>
+<div class="meta wrapper">
+	<time datetime="2023-10-14T17:20:00+08:00" pubdate>Sat 14 October 2023</time>
+	<ul class="tag clearfix">
+		<li><a href="./category/page.html">page</a></li>
+	</ul>
+</div>	</article>	
+</div>
+	
+		
+<footer class="clearfix">
+	<div class="wrapper pages">
+		<ul class="nav">
+			<li><a href="./archives.html">Archive</a></li>
+		</ul>
+	</div>
+	
+	<div class="copy wrapper">
+		<ul class="social">
+			<li><a href="#">You can add links in your config file</a></li>
+			<li><a href="#">Another social link</a></li>
+		</ul>
+	
+		<p role="contentinfo">		© 2017 wxz
+<br>
+		Proudly powered by <a href="http://alexis.notmyidea.org/pelican/">Pelican</a>.</p>
+	</div>
+</footer>
+</body>
+</html>
