@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="">	
+<head>
+	<meta charset="utf-8"/>
+	<title>web-monitor内存溢出重启脚本 - Restart</title>	
+
+	<meta name="author" content="wxz" />
+	<meta name="copyright" content="wxz" />
+	<meta property="og:site_name" content="Restart" />
+	<meta name="twitter:card" content="summary" />
+	<meta name="twitter:title" content="web-monitor内存溢出重启脚本" />
+	<meta name="date" content="2023-04-17 14:20:00+08:00" />
+	<meta property="og:type" content="article" />
+	<meta property="og:locale" content="en" />
+	<meta property="og:published_time" content="2023-04-17 14:20:00+08:00" />
+	<meta property="og:title" content="web-monitor内存溢出重启脚本" />
+	<meta property="og:url" content="./web-monitornei-cun-yi-chu-zhong-qi-jiao-ben.html" />
+	<meta property="og:description" content="项目上经常遇到web-monitor服务内存溢出，导致监控告警，如下监测内存溢出就自动重启webmonitor组件的脚本 代码如下： #!/bin/bash # 设置服务所在路径 SERVICE_HOME=/data/service/web-monitor-1.0.2 while true …" />
+	<meta name="description" content="项目上经常遇到web-monitor服务内存溢出，导致监控告警，如下监测内存溢出就自动重启webmonitor组件的脚本 代码如下： #!/bin/bash # 设置服务所在路径 SERVICE_HOME=/data/service/web-monitor-1.0.2 while true …" />
+	<meta name="HandheldFriendly" content="True" />
+	<meta name="MobileOptimized" content="320" />
+	<meta name="viewport" content="width=device-width, target-densitydpi=160dpi, initial-scale=1.0" />
+	<link rel="shortcut icon" href="./favicon.ico" type="image/x-icon" />
+	<link rel="icon" href="./favicon.ico" type="image/x-icon" />
+	<link href='https://fonts.googleapis.com/css?family=Droid+Sans:700,400|Droid+Sans+Mono' rel='stylesheet' type='text/css' />
+	<link rel="stylesheet" href="./theme/css/main.css" type="text/css" />
+		
+	<!--[if lt IE 9]>
+		<script src="//html5shim.googlecode.com/svn/trunk/html5.js"></script>
+	<![endif]-->
+	
+</head>
+	
+<body>		
+	<header class="clearfix" role="banner">
+		<div class="wrapper">
+			<h1 class="huge"><a href=".">Restart</a></h1>
+		</div>
+	</header>
+	
+<div role="main" class="content clearfix">	
+	<article>
+		<div class="post wrapper">
+			<h1>web-monitor内存溢出重启脚本</h1>
+			<p>项目上经常遇到web-monitor服务内存溢出，导致监控告警，如下监测内存溢出就自动重启webmonitor组件的脚本</p>
+<p>代码如下：</p>
+<div class="highlight"><pre><span></span><code><span class="ch">#!/bin/bash</span>
+
+<span class="c1"># 设置服务所在路径</span>
+<span class="nv">SERVICE_HOME</span><span class="o">=</span>/data/service/web-monitor-1.0.2
+
+<span class="k">while</span><span class="w"> </span><span class="nb">true</span>
+<span class="k">do</span>
+<span class="w">    </span><span class="c1"># 监控 Java 进程，计算内存使用情况</span>
+<span class="w">    </span><span class="nv">MEM_USAGE</span><span class="o">=</span><span class="k">$(</span>ps<span class="w"> </span>-eo<span class="w"> </span>pid,rss<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span><span class="sb">`</span>pgrep<span class="w"> </span>-f<span class="w"> </span><span class="s2">&quot;web-monitor-1.0.2&quot;</span><span class="sb">`</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>awk<span class="w"> </span><span class="s1">&#39;{pid+=$1;rss+=$2} END {print rss}&#39;</span><span class="k">)</span>
+
+<span class="w">    </span><span class="c1"># 如果内存使用超出预设值 1G，就重启服务</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="o">[</span><span class="w"> </span><span class="nv">$MEM_USAGE</span><span class="w"> </span>-gt<span class="w"> </span><span class="m">1073741824</span><span class="w"> </span><span class="o">]</span><span class="p">;</span><span class="w"> </span><span class="k">then</span>
+<span class="w">        </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;Memory usage exceeds limit. Restarting web-monitor-1.0.2 service...&quot;</span>
+<span class="w">        </span><span class="nv">$SERVICE_HOME</span>/bin/stop.sh
+<span class="w">        </span>sleep<span class="w"> </span><span class="m">5</span>
+<span class="w">        </span><span class="nv">$SERVICE_HOME</span>/bin/start.sh
+<span class="w">    </span><span class="k">fi</span>
+
+<span class="w">    </span><span class="c1"># 每隔 5 分钟检查一次</span>
+<span class="w">    </span>sleep<span class="w"> </span><span class="m">300</span>
+<span class="k">done</span>
+</code></pre></div>
+
+<p>运行此脚本</p>
+<div class="highlight"><pre><span></span><code>nohup bash monitor-service.sh &amp;
+</code></pre></div>
+
+			<a href="https://twitter.com/share" class="twitter-share-button" data-via="" data-lang="en" data-size="large" data-related="">Tweet</a>
+			<script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+		</div>
+<div class="meta wrapper">
+	<time datetime="2023-04-17T14:20:00+08:00" pubdate>Mon 17 April 2023</time>
+	<ul class="tag clearfix">
+		<li><a href="./category/page.html">page</a></li>
+	</ul>
+</div>	</article>	
+</div>
+	
+		
+<footer class="clearfix">
+	<div class="wrapper pages">
+		<ul class="nav">
+			<li><a href="./archives.html">Archive</a></li>
+		</ul>
+	</div>
+	
+	<div class="copy wrapper">
+		<ul class="social">
+			<li><a href="https://dianyi.ng/">You can add links in your config file</a></li>
+			<li><a href="#">Another social link</a></li>
+		</ul>
+	
+		<p role="contentinfo">		© 2017 wxz
+<br>
+		Proudly powered by <a href="http://alexis.notmyidea.org/pelican/">Pelican</a>.</p>
+	</div>
+</footer>
+</body>
+</html>
